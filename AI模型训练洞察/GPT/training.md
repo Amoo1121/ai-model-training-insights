@@ -44,7 +44,7 @@
 - Pipeline Parallelism
 - 混合精度训练 (FP16/BF16)
 
-### 2. 有监督微调 (SFT - Supervised Fine-Tuning)
+### 2. 有监督微调（SFT）
 
 **目标**：赋予模型指令跟随能力
 
@@ -71,7 +71,7 @@
 - 批量大小：32-64
 - 序列长度：4096
 
-### 3. 强化学习对齐 (RLHF)
+### 3. 强化学习对齐（RLHF）
 
 **阶段 1：奖励模型 (Reward Model) 训练**
 
@@ -109,7 +109,7 @@ maximize E[π(a|s) * A(s,a)] - β * KL(π || π_SFT)
 - γ (discount): 0.99
 - β (KL penalty): 0.01-0.1
 
-### 4. DPO (Direct Preference Optimization) - 可选替代
+### 4. 直接偏好优化（DPO，可选替代）
 
 **原理**：直接用偏好数据优化策略，无需显式奖励模型
 
@@ -120,7 +120,7 @@ L = -log(σ(r(x,y+) - r(x,y-)))
 
 **优点**：更简单，训练更稳定
 
-## 架构特点 (GPT-4 为例)
+## 架构特点（以 GPT-4 为例）
 
 ### 模型架构
 - **类型**：Transformer Decoder-only
@@ -139,7 +139,7 @@ L = -log(σ(r(x,y+) - r(x,y-)))
 - **GPT-3**：使用 Post-LayerNorm
 
 ### 激活函数
--3**：GELU- **GPT (Gaussian Error Linear Unit)
+- **激活函数**：GELU（Gaussian Error Linear Unit）
 - **词表**：50,257 tokens
 
 ### MoE (Mixture of Experts) - GPT-4
