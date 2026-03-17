@@ -5,6 +5,8 @@
 - **GLM-4** (2024年1月) - 智谱 / Z.AI 旗舰模型，支持长上下文
 - **GLM-4V** (2024年1月) - 视觉多模态版本
 - **GLM-4Plus** (2024年8月) - 增强版，性能提升
+- **GLM-4.5** (2025年) - 面向 reasoning / coding / agent 的 MoE 基础模型，128K 上下文
+- **GLM-4.7** (2025年) - 在 4.5 路线上继续强化编程、多步执行与前端生成能力，200K 上下文
 - **GLM-5** (2026年) - 新一代旗舰基础模型，面向 **Agentic Engineering**
 
 ## 训练流程
@@ -26,6 +28,8 @@ flowchart TD
 | 版本 | 预训练 Token 数 | 数据来源 |
 |------|----------------|----------|
 | GLM-4 | ~2T | 网页、代码、书籍、学术论文 |
+| GLM-4.5 | **15T**（官方文档） | 通用数据 + code / reasoning / agent 任务数据 |
+| GLM-4.7 | 未完全公开 | 延续 4.5 路线，重点强化编程与复杂 Agent 执行相关数据 |
 | GLM-5 | **28.5T**（官博/官方文档） | 多源大规模高质量数据，面向代码、Agent 与复杂任务场景 |
 
 **GLM-5 数据特点（公开资料总结 / 部分推断）**：
@@ -58,6 +62,8 @@ flowchart TD
 |------|--------|----------|----------------|-----------|
 | GLM-4 9B | 40 | 32 | 11008 | 128K |
 | GLM-4 130B | 80 | 64 | 20480 | 128K |
+| GLM-4.5 | 92 | 96 | MoE，160 路由专家 + 1 共享专家 | **128K**（官方文档 / HF config） |
+| GLM-4.7 | 92 | 96 | MoE，160 路由专家 + 1 共享专家 | **200K**（官方文档 / HF config） |
 | GLM-5 | 78 | 64 | MoE + DSA，256 路由专家 + 1 共享专家 | **200K**（官方文档） |
 
 **训练超参数（公开资料总结 / 部分推断）**：
@@ -86,19 +92,29 @@ flowchart TD
 
 ### 3. 对齐训练 (RLHF / DPO / 异步强化学习)
 
-#### GLM-5 对齐重点（官方资料 + 公开总结）
-- **Agentic Engineering**：官方明确将 GLM-5 定位为面向复杂系统工程与长程 Agent 任务的旗舰模型
-- **异步强化学习**：官方提到新的 **Slime** 框架，用于支持更大模型规模与更复杂 RL 任务
+#### GLM-4.5 / 4.7 / 5 对齐重点（官方资料 + 公开总结）
+- **GLM-4.5**：官方明确提到预训练后继续进行面向 **code、reasoning、agent-specific tasks** 的 targeted fine-tuning，并用强化学习提升 reasoning、coding、agent performance
+- **GLM-4.7**：官方重点强调 **enhanced programming capabilities**、**more stable multi-step reasoning / execution**，并引入 retained reasoning 与 round-based reasoning 以增强复杂任务可控性
+- **GLM-5**：官方明确将其定位为面向复杂系统工程与长程 Agent 任务的旗舰模型
+- **异步强化学习**：GLM-5 官方提到新的 **Slime** 框架，用于支持更大模型规模与更复杂 RL 任务
 - **长程交互学习**：通过异步 agent reinforcement learning，让模型从长范围交互中持续学习
-- **工具调用与复杂执行**：面向多步任务、资源管理、依赖协调与目标保持能力增强
+- **工具调用与复杂执行**：围绕多步任务、资源管理、依赖协调与目标保持能力持续增强
 
 ## 架构特点
 
-### 1. GLM-4 及此前路线
+### 1. GLM-4 / 4.5 / 4.7 / 5 演进路线
 
-- **Transformer Decoder**
-- **RoPE / 长上下文位置编码路线**
-- **SwiGLU 激活函数**
+```mermaid
+flowchart LR
+    G4[GLM-4\nDense / 长上下文基础路线] --> G45[GLM-4.5\nMoE 基础模型\n355B / 32B active\n128K context]
+    G45 --> G47[GLM-4.7\n强化 coding / 多步执行\n200K context]
+    G47 --> G5[GLM-5\nDSA + MoE\n744B / 40B active\n200K context]
+```
+
+- **GLM-4**：Transformer Decoder 基础路线
+- **GLM-4.5**：显式转向 reasoning / coding / agent 场景的 MoE 基础模型
+- **GLM-4.7**：延续 4.5 结构骨架，重点增强编程、多步执行稳定性与前端生成能力
+- **GLM-5**：进一步引入 DSA 与更大规模基础模型，面向 Agentic Engineering
 
 ### 2. GLM-5 架构
 
@@ -144,8 +160,25 @@ flowchart TD
 
 ## 技术亮点
 
-### GLM-5 官方可直接确认的信息
+### GLM-4.5 / 4.7 / 5 官方可直接确认的信息
 
+#### GLM-4.5
+- **定位**：面向 reasoning、coding、agent-oriented applications 的基础模型
+- **参数规模**：**355B total / 32B activated**
+- **轻量版本**：GLM-4.5-Air 为 **106B total / 12B activated**
+- **预训练数据**：**15T**
+- **上下文长度**：**128K**
+- **最大输出长度**：**96K**
+- **后训练**：官方明确提到强化学习用于增强 reasoning、coding 与 agent performance
+
+#### GLM-4.7
+- **定位**：在 4.5 路线上继续强化 programming capabilities 与 stable multi-step reasoning / execution
+- **上下文长度**：**200K**
+- **最大输出长度**：**128K**
+- **能力重点**：coding、tool invocation、frontend aesthetics、复杂多步任务执行
+- **官方 benchmark 表述**：在 SWE-bench Verified、LiveCodeBench V6、τ²-Bench 等任务上强调开源领先表现
+
+#### GLM-5
 - **定位**：Z.AI 新一代旗舰基础模型，面向 **Agentic Engineering**
 - **上下文长度**：**200K**
 - **最大输出长度**：**128K**
@@ -205,11 +238,17 @@ flowchart TD
 
 ## 参考文献
 
-1. **GLM-5 官方博客**: https://z.ai/blog/glm-5
-2. **GLM-5 官方文档**: https://docs.z.ai/guides/llm/glm-5
-3. **GLM-5 Hugging Face 配置**: https://huggingface.co/zai-org/GLM-5/blob/main/config.json
-4. **GLM-130B**: https://arxiv.org/abs/2210.05858
-5. **Z.AI 开发者文档**: https://docs.z.ai/
+1. **GLM-4.5 官方博客 / 文档**: https://z.ai/blog/glm-4.5
+2. **GLM-4.5 官方文档**: https://docs.z.ai/guides/llm/glm-4.5
+3. **GLM-4.5 Hugging Face 配置**: https://huggingface.co/zai-org/GLM-4.5/blob/main/config.json
+4. **GLM-4.7 官方博客**: https://z.ai/blog/glm-4.7
+5. **GLM-4.7 官方文档**: https://docs.z.ai/guides/llm/glm-4.7
+6. **GLM-4.7 Hugging Face 配置**: https://huggingface.co/zai-org/GLM-4.7/blob/main/config.json
+7. **GLM-5 官方博客**: https://z.ai/blog/glm-5
+8. **GLM-5 官方文档**: https://docs.z.ai/guides/llm/glm-5
+9. **GLM-5 Hugging Face 配置**: https://huggingface.co/zai-org/GLM-5/blob/main/config.json
+10. **GLM-130B**: https://arxiv.org/abs/2210.05858
+11. **Z.AI 开发者文档**: https://docs.z.ai/
 
 ---
 
